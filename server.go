@@ -329,15 +329,22 @@ func Server() {
 	}()
 
 	// Start server
-	port := os.Getenv("PORT")  // Render sets this environment variable automatically
+	port := os.Getenv("PORT")  // Get the port from the environment variable
 if port == "" {
     log.Fatal("PORT environment variable is not set!")
 }
 
 srv := &http.Server{
-    Addr:    ":" + port,  // Use the dynamic port from the environment variable
+    Addr:    ":" + port,  // Use the dynamic port
     Handler: c,
 }
+
+go func() {
+    logger.Println("Server starting on port", port)
+    if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+        logger.Fatalf("Server failed: %v", err)
+    }
+}()
 
 
 	// Run server in goroutine so we can handle shutdown gracefully
